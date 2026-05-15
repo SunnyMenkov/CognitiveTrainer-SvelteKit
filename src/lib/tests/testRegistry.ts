@@ -11,7 +11,8 @@ export const testRegistry = {
         component: () => import("$lib/tests/Attention.svelte")
     },
     memory1: {
-        title: "Тест на память(интерференция)",
+        title: "Тест на память",
+        description: "Запоминайте содержимое картинок",
         component: () => import("$lib/tests/Memory1.svelte")
     },
     memory2: {
