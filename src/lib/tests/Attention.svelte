@@ -3,6 +3,8 @@
 	let n = $state(30); // сколько чисел всего
 	let m = $state(5);  // сколько нужно найти
 
+	let errors = $state(0); // ошибки
+
 	let numbers = $state([]);
 	let targets = $state(new Set());
 	let found = $state(new Set());
@@ -30,12 +32,10 @@
 		targets = new Set(shuffled.slice(0, m));
 
 		found = new Set();
-		started = false;
+		
 		stopTimer();
 		elapsed = 0;
-	}
-
-	function startTest() {
+	
 		started = true;
 		startTime = Date.now();
 
@@ -62,7 +62,11 @@
 			if (found.size === targets.size) {
 				stopTimer();
 				alert(`Готово! Время: ${elapsed} сек`);
+				started = false;
 			}
+		}
+		else {
+			errors+=1;
 		}
 	}
 </script>
@@ -78,18 +82,20 @@
 		<input type="number" bind:value={m} min="1" />
 	</label>
 
-	<button on:click={generateTest}>Сгенерировать</button>
-	<button on:click={startTest} disabled={!numbers.length || started}>
+	<button on:click={generateTest}>
 		Старт
 	</button>
 </div>
 
-<p>Время: {elapsed} сек</p>
-<p>Найдено: {found.size} / {targets.size}</p>
+<div class="results">
+	<p>Время: {elapsed} сек</p>
+	<p class="error">Ошибки: {errors}</p>
+	<p class="found">Найдено: {found.size} / {targets.size}</p>
+</div>
 
 {#if started}
-	<p><strong>Найди числа:</strong> {[...targets].join(', ')}</p>
-{/if}
+	<p class="targets"><strong>Найди числа:</strong> {[...targets].join(', ')}</p>
+
 
 <div class="grid">
 	{#each numbers as num}
@@ -102,6 +108,7 @@
 	{/each}
 </div>
 
+{/if}
 
 <style>
 	:global(body) {
@@ -121,6 +128,43 @@
 	p {
 		max-width: 900px;
 		margin-inline: auto;
+		/* text-align: ; */
+	}
+
+.results {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.results p {
+    text-align: center;
+    font-size: 1em;
+    background-color: #364b6c;
+    padding: 2em;
+    border-radius: 8px;
+    margin: 0;
+}
+
+	.error {
+		color: #ff4d4d !important;
+		font-size: 1rem;
+		font-weight: 600;
+	}
+
+	.found {
+		color: #4caf50 !important;
+		font-size: 1rem;
+		font-weight: 600;
+	}
+
+	.targets {
+		text-align: center;
+		font-size: 1.2em;
+		margin-top: 20px;
+		color: white;
 	}
 
 	.controls {
