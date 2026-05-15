@@ -18,6 +18,7 @@
 
 {#if TestComponent}
   <h1>{test?.title || 'Тест'}</h1>
+  <p>{test?.description || 'Описание теста отсутствует.'}</p>
   <TestComponent />
 
 {:else if !test}
