@@ -1,3 +1,3 @@
 <!-- placeholder -->
 
-<h1>Placeholder</h1>
+<p>Placeholder</p>
