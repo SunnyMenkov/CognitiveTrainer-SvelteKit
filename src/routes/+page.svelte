@@ -12,7 +12,7 @@
         <!-- <a class="test" href={resolve('/attention')}>Тест Внимание</a> -->
     
         {#each Object.entries(testRegistry) as [slug, test] (slug)}
-        <a href={resolve(`/test/${slug}`)} class="test">{test.title}<p>{test.description}</p></a>
+        <a href={resolve(`/test/${slug}`)} class="test">{test.title}</a>
        
         {/each}
     </div>
@@ -50,7 +50,7 @@
     align-content: center;
     /* width: auto; */
     margin-top: 20px;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     /* grid-template-columns: 1fr 1fr 1fr; */    
 }
 
@@ -63,7 +63,6 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
 
-    font-weight:600;
     display: flex;
     /* flex-grow: 1; */
     flex-direction: column;

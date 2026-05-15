@@ -15,7 +15,7 @@ To recreate this project with the same configuration:
 
 ```sh
 # recreate this project
-npx sv@0.15.2 create --template minimal --types ts --add eslint prettier mcp="ide:vscode+setup:remote" --install npm ./
+npx sv@0.15.2 create --template minimal --types ts --add eslint prettier drizzle="database:sqlite+sqlite:better-sqlite3" better-auth="demo:password" mcp="ide:vscode+setup:remote" --install npm ./
 ```
 
 ## Developing
