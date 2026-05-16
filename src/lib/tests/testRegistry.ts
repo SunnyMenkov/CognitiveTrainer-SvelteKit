@@ -9,5 +9,15 @@ export const testRegistry = {
         title: "Тест на внимание",
         description: "Найти m из n чисел как можно быстрее",
         component: () => import("$lib/tests/Attention.svelte")
+    },
+    flanker: {
+        title: "Фланговый тест Эриксена",
+        description: "Измерение концентрации и скорости обработки данных",
+        component: () => import("$lib/tests/FlankerTest.svelte")
+    },
+    letter: {
+        title: "Буквенный охват",
+        description: "На короткое время показывается набор букв — запомните их порядок.",
+        component: () => import("$lib/tests/LetterCoverageTest.svelte")
     }
 }
