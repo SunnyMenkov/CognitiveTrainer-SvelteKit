@@ -114,7 +114,7 @@
 	:global(body) {
 		margin: 0;
 		font-family: Arial, sans-serif;
-		background: #0c1452;
+		/* background: #0c1452; */
 		color: black;
 	}
 
@@ -173,7 +173,7 @@
 		margin-bottom: 20px;
 		flex-wrap: wrap;
 		padding: 20px;
-		background: rgba(255, 255, 255, 0.08);
+		background: #364b6c;
 		border-radius: 20px;
 		backdrop-filter: blur(8px);
 	}
