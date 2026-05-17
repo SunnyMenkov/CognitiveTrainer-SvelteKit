@@ -1,3 +1,0 @@
-<!-- placeholder -->
-
-<p>Placeholder</p>

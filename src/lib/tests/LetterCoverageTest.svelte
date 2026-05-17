@@ -1,6 +1,8 @@
 <script>
 	// @ts-nocheck
 	// Svelte 5 runes
+	import { submitAttempt } from '$lib/tests/recordAttempt';
+
 	const LETTERS = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'.split('');
 	const MAX_GAME_SECONDS = 60;
 	const SHOW_SECONDS = 3;
@@ -16,9 +18,15 @@
 	let showing = $state(false);
 	let elapsed = $state(0);
 	let maxSpan = $state(0);
+	let timeoutTriggered = $state(false);
 
 	let showInterval = null;
 	let gameInterval = null;
+
+	// Трекинг для статистики
+	let testStartedAt = 0;   // момент нажатия Старт
+	let inputStartedAt = 0;  // момент, когда показ закончился и пользователь начал выбирать
+	let answerLog = [];      // лог раундов
 
 	function shuffle(arr) {
 		for (let i = arr.length - 1; i > 0; i--) {
@@ -56,6 +64,7 @@
 				clearInterval(showInterval);
 				showInterval = null;
 				showing = false;
+				inputStartedAt = Date.now();
 			}
 		}, 1000);
 	}
@@ -67,10 +76,17 @@
 		elapsed = 0;
 		maxSpan = 0;
 		numLetters = START_LENGTH;
+		testStartedAt = Date.now();
+		inputStartedAt = 0;
+		answerLog = [];
+		timeoutTriggered = false;
 
 		gameInterval = setInterval(() => {
 			elapsed++;
-			if (elapsed >= MAX_GAME_SECONDS) endGame();
+			if (elapsed >= MAX_GAME_SECONDS) {
+				timeoutTriggered = true;
+				endGame();
+			}
 		}, 1000);
 
 		nextRound();
@@ -81,7 +97,19 @@
 	}
 
 	function checkAnswer() {
-		if (userAnswer.join('') === lettersToShow) {
+		const submitted = userAnswer.join('');
+		const isCorrect = submitted === lettersToShow;
+		const reactionTimeMs = inputStartedAt > 0 ? Date.now() - inputStartedAt : 0;
+
+		answerLog.push({
+			target: lettersToShow,
+			submitted,
+			isCorrect,
+			reactionTimeMs,
+			letterCount: lettersToShow.length
+		});
+
+		if (isCorrect) {
 			maxSpan = Math.max(maxSpan, lettersToShow.length);
 			nextRound();
 		} else {
@@ -94,6 +122,7 @@
 		started = false;
 		finished = true;
 		numLetters = START_LENGTH;
+		void sendAttemptToServer();
 	}
 
 	function restart() {
@@ -103,6 +132,42 @@
 		showing = false;
 		maxSpan = 0;
 		elapsed = 0;
+		answerLog = [];
+		timeoutTriggered = false;
+	}
+
+	// Отправка результатов в БД через единый API
+	async function sendAttemptToServer() {
+		if (answerLog.length === 0) return;
+
+		const roundsCompleted = answerLog.filter((round) => round.isCorrect).length;
+		const meta = {
+			maxSpan,
+			roundsCompleted,
+			roundsAttempted: answerLog.length,
+			timeoutTriggered
+		};
+
+		await submitAttempt({
+			testSlug: 'letter',
+			startedAt: new Date(testStartedAt).toISOString(),
+			durationMs: Date.now() - testStartedAt,
+			score: maxSpan,
+			maxScore: LETTERS.length,
+			normalizedScore: Math.min(100, Math.round((maxSpan / 10) * 100)),
+			meta,
+			answers: answerLog.map((round, index) => ({
+				questionId: `round-${index + 1}`,
+				answer: round.submitted,
+				isCorrect: round.isCorrect,
+				reactionTimeMs: round.reactionTimeMs,
+				meta: {
+					target: round.target,
+					submitted: round.submitted,
+					letterCount: round.letterCount
+				}
+			}))
+		});
 	}
 
 	function verdict(span) {

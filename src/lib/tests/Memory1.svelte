@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { submitAttempt } from '$lib/tests/recordAttempt';
+	import type { Memory1Meta } from '$lib/stats/contracts';
+
 	type Option = {
 		value: string;
 		label: string;
@@ -144,6 +147,11 @@
 	let answers = $state<Record<number, string>>({});
 	let finished = $state(false);
 
+	// Трекинг для статистики
+	let testStartedAt = $state(Date.now());
+	let questionShownAt = $state(Date.now());
+	let answerTimings = $state<Record<number, number>>({});
+
 	const currentQuestion = () => questions[currentIndex];
 
 	const optionForValue = (question: Question, value: string) =>
@@ -186,31 +194,45 @@
 
 	const answerQuestion = (value: string) => {
 		const question = currentQuestion();
+		const reactionTimeMs = Date.now() - questionShownAt;
 
 		answers = {
 			...answers,
 			[question.id]: value
 		};
+		answerTimings = {
+			...answerTimings,
+			[question.id]: reactionTimeMs
+		};
 
 		if (currentIndex < questions.length - 1) {
 			currentIndex += 1;
+			questionShownAt = Date.now();
 		} else {
 			finished = true;
+			void sendAttemptToServer();
 		}
 	};
 
 	const advanceObservation = () => {
 		const question = currentQuestion();
+		const reactionTimeMs = Date.now() - questionShownAt;
 
 		answers = {
 			...answers,
 			[question.id]: 'seen'
 		};
+		answerTimings = {
+			...answerTimings,
+			[question.id]: reactionTimeMs
+		};
 
 		if (currentIndex < questions.length - 1) {
 			currentIndex += 1;
+			questionShownAt = Date.now();
 		} else {
 			finished = true;
+			void sendAttemptToServer();
 		}
 	};
 
@@ -218,6 +240,43 @@
 		currentIndex = 0;
 		answers = {};
 		finished = false;
+		testStartedAt = Date.now();
+		questionShownAt = Date.now();
+		answerTimings = {};
+	};
+
+	// Отправка результатов в БД через единый API
+	const sendAttemptToServer = async () => {
+		const correct = score();
+
+		const meta: Memory1Meta = {
+			recallQuestionIds: recallQuestions.map((question) => question.id)
+		};
+
+		await submitAttempt({
+			testSlug: 'memory1',
+			startedAt: new Date(testStartedAt).toISOString(),
+			durationMs: Date.now() - testStartedAt,
+			score: correct,
+			maxScore: recallQuestions.length,
+			normalizedScore: Math.round((correct / recallQuestions.length) * 100),
+			meta,
+			answers: questions.map((question) => {
+				const selectedValue = answers[question.id];
+				const option = selectedValue ? optionForValue(question, selectedValue) : undefined;
+				return {
+					questionId: String(question.id),
+					answer: selectedValue ?? undefined,
+					isCorrect: question.scored ? Boolean(option?.correct) : null,
+					reactionTimeMs: answerTimings[question.id] ?? 0,
+					meta: {
+						kind: question.kind,
+						scored: question.scored,
+						prompt: question.prompt
+					}
+				};
+			})
+		});
 	};
 
 	const userAnswerLabel = (question: Question) => {

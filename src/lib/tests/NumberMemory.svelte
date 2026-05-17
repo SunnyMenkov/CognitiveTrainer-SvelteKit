@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
+	import { submitAttempt } from '$lib/tests/recordAttempt';
+	import type { NumberMemoryMeta } from '$lib/stats/contracts';
 //Ключевая переменная
 	type Phase = 'intro' | 'memorize' | 'input' | 'review' | 'finished';
 //Структура одного уровня
@@ -14,6 +16,7 @@
 		sequence: number[];
 		submitted: number[];
 		isCorrect: boolean;
+		reactionTimeMs: number;
 	};
 
 //настройка теста
@@ -35,6 +38,10 @@
 
 	let countdownInterval: ReturnType<typeof setInterval> | null = null;//повторяющийся таймер
 	let revealTimeout: ReturnType<typeof setTimeout> | null = null;//одноразовный таймер
+
+	// Трекинг для статистики
+	let testStartedAt = 0; // timestamp начала теста (от первого startTest)
+	let inputStartedAt = 0; // timestamp начала input-фазы текущего уровня (для reactionTime)
 
 //helper функции
 
@@ -99,12 +106,14 @@
 		revealTimeout = setTimeout(() => {
 			clearTimers();
 			phase = 'input';
+			inputStartedAt = Date.now();
 		}, studySeconds * 1000);
 	};
 
 //начинаем тест с первого уровня
 	const startTest = () => {
 		acceptedReviews = [];
+		testStartedAt = Date.now();
 		startLevel(0);
 	};
 
@@ -155,7 +164,8 @@
 			level: currentLevelNumber(),
 			sequence: [...currentSequence],//..., чтобы сохранить именно копию массива
 			submitted,
-			isCorrect: submitted.every((value, index) => value === currentSequence[index])//проверяем строгий порядок
+			isCorrect: submitted.every((value, index) => value === currentSequence[index]),//проверяем строгий порядок
+			reactionTimeMs: inputStartedAt > 0 ? Date.now() - inputStartedAt : 0
 		};
 		phase = 'review';
 	};
@@ -170,10 +180,46 @@
 		if (isLastLevel()) {
 			clearTimers();
 			phase = 'finished';
+			void sendAttemptToServer();
 			return;
 		}
 
 		startLevel(currentLevelIndex + 1);
+	};
+
+	// Отправка результатов в БД через единый API
+	const sendAttemptToServer = async () => {
+		const correct = correctLevels();
+		const digitSpan = acceptedReviews
+			.filter((review) => review.isCorrect)
+			.reduce((max, review) => Math.max(max, levelConfigs[review.level - 1].count), 0);
+
+		const meta: NumberMemoryMeta = {
+			digitSpan,
+			levelConfigs
+		};
+
+		await submitAttempt({
+			testSlug: 'memory2',
+			startedAt: new Date(testStartedAt).toISOString(),
+			durationMs: Date.now() - testStartedAt,
+			score: correct,
+			maxScore: levelConfigs.length,
+			normalizedScore: Math.round((correct / levelConfigs.length) * 100),
+			meta,
+			answers: acceptedReviews.map((review) => ({
+				questionId: `level-${review.level}`,
+				answer: review.submitted.join(' '),
+				isCorrect: review.isCorrect,
+				reactionTimeMs: review.reactionTimeMs,
+				meta: {
+					target: review.sequence,
+					submitted: review.submitted,
+					count: review.sequence.length,
+					mode: levelConfigs[review.level - 1].mode
+				}
+			}))
+		});
 	};
 
 //совпало ли число пользователя с правильным числом

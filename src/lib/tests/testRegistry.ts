@@ -1,8 +1,8 @@
 export const testRegistry = {
-    stroop: {
-        title: "Тест струпа",
-        description: "Это тест на цвет слова",
-        component: () => import("$lib/tests/StroopTest.svelte")
+    emoji: {
+        title: "Тест на смену эмодзи",
+        description: "Определите, изменился ли эмодзи или остался прежним",
+        component: () => import("$lib/tests/EmojiTest.svelte")
 
     },
     attention: {

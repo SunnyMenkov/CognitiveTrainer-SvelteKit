@@ -1,4 +1,6 @@
 <script>
+	import { SvelteSet } from "svelte/reactivity";
+
 	// Svelte 5 runes
 	let n = $state(30); // сколько чисел всего
 	let m = $state(5);  // сколько нужно найти
@@ -21,7 +23,7 @@
 		}
 
 		// генерируем уникальные числа
-		const arr = new Set();
+		const arr = new SvelteSet();
 		while (arr.size < n) {
 			arr.add(Math.floor(Math.random() * 1000));
 		}
@@ -31,7 +33,7 @@
 		const shuffled = [...numbers].sort(() => Math.random() - 0.5);
 		targets = new Set(shuffled.slice(0, m));
 
-		found = new Set();
+		found = new SvelteSet();
 		
 		stopTimer();
 		elapsed = 0;
@@ -56,7 +58,7 @@
 
 		if (targets.has(num)) {
 			found.add(num);
-			found = new Set(found);
+			found = new SvelteSet(found);
 
 			// завершение теста
 			if (found.size === targets.size) {
@@ -82,7 +84,7 @@
 		<input type="number" bind:value={m} min="1" />
 	</label>
 
-	<button on:click={generateTest}>
+	<button onclick={generateTest}>
 		Старт
 	</button>
 </div>
@@ -98,10 +100,10 @@
 
 
 <div class="grid">
-	{#each numbers as num}
+	{#each numbers as num (num)}
 		<button
 			class:selected={found.has(num)}
-			on:click={() => handleClick(num)}
+			onclick={() => handleClick(num)}
 		>
 			{num}
 		</button>
@@ -114,7 +116,7 @@
 	:global(body) {
 		margin: 0;
 		font-family: Arial, sans-serif;
-		background: #0c1452;
+		/* background: #0c1452; */
 		color: black;
 	}
 
@@ -173,7 +175,7 @@
 		margin-bottom: 20px;
 		flex-wrap: wrap;
 		padding: 20px;
-		background: rgba(255, 255, 255, 0.08);
+		background: #364b6c;
 		border-radius: 20px;
 		backdrop-filter: blur(8px);
 	}
