@@ -26,10 +26,11 @@ export const actions: Actions = {
 				}
 			});
 		} catch (error) {
+			console.error('[signInEmail] error:', error);
 			if (error instanceof APIError) {
 				return fail(400, { message: error.message || 'Signin failed' });
 			}
-			return fail(500, { message: 'Unexpected error' });
+			return fail(500, { message: `Unexpected error: ${(error as Error)?.message ?? error}` });
 		}
 
 		return redirect(302, '/demo/better-auth');
@@ -50,10 +51,11 @@ export const actions: Actions = {
 				}
 			});
 		} catch (error) {
+			console.error('[signUpEmail] error:', error);
 			if (error instanceof APIError) {
 				return fail(400, { message: error.message || 'Registration failed' });
 			}
-			return fail(500, { message: 'Unexpected error' });
+			return fail(500, { message: `Unexpected error: ${(error as Error)?.message ?? error}` });
 		}
 
 		return redirect(302, '/demo/better-auth');

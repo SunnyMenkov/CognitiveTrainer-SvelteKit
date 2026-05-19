@@ -1,4 +1,9 @@
 <script lang="ts">
+<<<<<<< InarBranch
+	import { submitAttempt } from '$lib/tests/recordAttempt';
+
+=======
+>>>>>>> main
 	const EMOJIS = [
 		'😀',
 		'😃',
@@ -34,7 +39,11 @@
 		'😳',
 	];
 
+<<<<<<< InarBranch
+	const TEST_DURATION = 60;
+=======
 	const TEST_DURATION = 1;
+>>>>>>> main
 
 	let currentEmoji = $state('😀');
 	let previousEmoji = $state('😀');
@@ -52,6 +61,23 @@
 
 	let timerInterval: number;
 
+<<<<<<< InarBranch
+	// Трекинг для статистики
+	let testStartedAt = 0;     // момент нажатия "Начать тест"
+	let emojiShownAt = 0;      // момент показа текущего стимула
+	type TrialLog = {
+		index: number;
+		previousEmoji: string;
+		currentEmoji: string;
+		actualChanged: boolean;
+		userSaidChanged: boolean;
+		isCorrect: boolean;
+		reactionTimeMs: number;
+	};
+	let trialLog: TrialLog[] = [];
+
+=======
+>>>>>>> main
 	function randomEmoji(exclude?: string) {
 		let filtered = exclude
 			? EMOJIS.filter((e) => e !== exclude)
@@ -73,19 +99,47 @@
 		} else {
 			currentEmoji = previousEmoji;
 		}
+<<<<<<< InarBranch
+
+		emojiShownAt = Date.now();
+=======
+>>>>>>> main
 	}
 
 	function answer(userThinksChanged: boolean) {
 		if (!started || finished) return;
 
+<<<<<<< InarBranch
+		const now = Date.now();
+		const reactionTimeMs = emojiShownAt > 0 ? now - emojiShownAt : 0;
+		const isCorrect = userThinksChanged === actualChanged;
+
+		totalAnswers++;
+
+		if (isCorrect) {
+=======
 		totalAnswers++;
 
 		if (userThinksChanged === actualChanged) {
+>>>>>>> main
 			score++;
 		} else {
 			mistakes++;
 		}
 
+<<<<<<< InarBranch
+		trialLog.push({
+			index: totalAnswers,
+			previousEmoji,
+			currentEmoji,
+			actualChanged,
+			userSaidChanged: userThinksChanged,
+			isCorrect,
+			reactionTimeMs
+		});
+
+=======
+>>>>>>> main
 		generateNextEmoji();
 	}
 
@@ -104,6 +158,12 @@
 		currentEmoji = randomEmoji();
 		previousEmoji = currentEmoji;
 
+<<<<<<< InarBranch
+		testStartedAt = Date.now();
+		trialLog = [];
+
+=======
+>>>>>>> main
 		generateNextEmoji();
 
 		timerInterval = window.setInterval(() => {
@@ -120,6 +180,57 @@
 		started = false;
 
 		cleanup();
+<<<<<<< InarBranch
+		void sendAttemptToServer();
+	}
+
+	// Отправка результатов в БД через единый API
+	async function sendAttemptToServer() {
+		if (trialLog.length === 0) return;
+
+		// Сигнальная теория: разбиваем ответы на 4 категории
+		const hits = trialLog.filter((t) => t.actualChanged && t.userSaidChanged).length;
+		const misses = trialLog.filter((t) => t.actualChanged && !t.userSaidChanged).length;
+		const falseAlarms = trialLog.filter((t) => !t.actualChanged && t.userSaidChanged).length;
+		const correctRejections = trialLog.filter((t) => !t.actualChanged && !t.userSaidChanged).length;
+
+		const correctRts = trialLog.filter((t) => t.isCorrect).map((t) => t.reactionTimeMs);
+		const avgReactionMs = correctRts.length
+			? Math.round(correctRts.reduce((s, v) => s + v, 0) / correctRts.length)
+			: 0;
+
+		const meta = {
+			durationSeconds: TEST_DURATION,
+			totalTrials: trialLog.length,
+			hits,
+			misses,
+			falseAlarms,
+			correctRejections,
+			avgReactionMs
+		};
+
+		await submitAttempt({
+			testSlug: 'emoji',
+			startedAt: new Date(testStartedAt).toISOString(),
+			durationMs: Date.now() - testStartedAt,
+			score,
+			maxScore: trialLog.length,
+			normalizedScore: trialLog.length ? Math.round((score / trialLog.length) * 100) : 0,
+			meta,
+			answers: trialLog.map((entry) => ({
+				questionId: `trial-${entry.index}`,
+				answer: entry.userSaidChanged ? 'changed' : 'unchanged',
+				isCorrect: entry.isCorrect,
+				reactionTimeMs: entry.reactionTimeMs,
+				meta: {
+					previousEmoji: entry.previousEmoji,
+					currentEmoji: entry.currentEmoji,
+					actualChanged: entry.actualChanged
+				}
+			}))
+		});
+=======
+>>>>>>> main
 	}
 
 	function cleanup() {

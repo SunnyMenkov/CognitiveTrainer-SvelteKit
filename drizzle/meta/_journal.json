@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1778934391066,
+      "tag": "0000_conscious_klaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778934718281,
+      "tag": "0001_deep_demogoblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778936817105,
+      "tag": "0002_stale_korvac",
+      "breakpoints": true
+    }
+  ]
+}
