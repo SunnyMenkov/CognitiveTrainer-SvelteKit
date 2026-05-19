@@ -8,15 +8,17 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<body>
   <!-- Навбар сверху -->
+
     <nav class="navbar">
         <div class="nav-container">
-            <a class="nav-button" href="../">Главная</a>
-            <a class="nav-button" href="../about/">О тестах</a>
+            <a class="nav-button" href="/">Главная</a>
+            <a class="nav-button" href="/about/">О тестах</a>
+            <a class="nav-button" href="/demo/better-auth/login/">Вход</a>
+            <a class="nav-button" href="/admin/">Админ-панель</a>
         </div>
     </nav>
-</body>
+
 
 <style>
 
@@ -28,10 +30,9 @@
     box-sizing: border-box;
 }
 
-body {
+:global(body) {
     font-family: Arial, sans-serif;
-    background-color: #253c5f; 
-    /* bcc1c8 */
+    background-color: #253c5f;
 }
 
 /* Стили для навбара */
@@ -46,6 +47,7 @@ body {
 }
 
 .nav-container {
+    
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
