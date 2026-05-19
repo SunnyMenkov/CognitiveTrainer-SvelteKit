@@ -1,8 +1,6 @@
 <script>
 	// @ts-nocheck
 	// Svelte 5 runes
-	import { submitAttempt } from '$lib/tests/recordAttempt';
-
 	const TOTAL_TRIALS = 50;
 	const MAX_TEST_SECONDS = 120;
 
@@ -18,18 +16,8 @@
 
 	const trialIndex = $derived(TOTAL_TRIALS - trials.length);
 
-	// Трекинг для статистики
-	let testStartedAt = 0; // момент старта теста
-	let trialShownAt = 0;  // момент показа текущего trial
-	let answerLog = [];    // лог всех ответов
-
 	function arrowSymbol(dir) {
 		return dir === 'left' ? '←' : '→';
-	}
-
-	function isCongruent(trial) {
-		const target = trial[2];
-		return trial.every((d) => d === target);
 	}
 
 	function generateTrials() {
@@ -63,9 +51,6 @@
 		trials = generateTrials();
 		currentTrial = trials.shift() ?? null;
 		layoutKey++;
-		testStartedAt = Date.now();
-		trialShownAt = Date.now();
-		answerLog = [];
 		stopTimer();
 		intervalId = setInterval(() => {
 			elapsedTime++;
@@ -78,22 +63,10 @@
 
 	function answer(dir) {
 		if (testFinished || !currentTrial) return;
-		const reactionTimeMs = Date.now() - trialShownAt;
-		const target = currentTrial[2];
-		const correct = dir === target;
-		if (correct) correctAnswers++;
-		answerLog.push({
-			trial: [...currentTrial],
-			target,
-			selected: dir,
-			isCorrect: correct,
-			congruent: isCongruent(currentTrial),
-			reactionTimeMs
-		});
+		if (dir === currentTrial[2]) correctAnswers++;
 		if (trials.length) {
 			currentTrial = trials.shift();
 			layoutKey++;
-			trialShownAt = Date.now();
 		} else {
 			finishTest();
 		}
@@ -104,7 +77,6 @@
 		stopTimer();
 		testFinished = true;
 		currentTrial = null;
-		void sendAttemptToServer();
 	}
 
 	function restartTest() {
@@ -117,50 +89,6 @@
 		correctAnswers = 0;
 		elapsedTime = 0;
 		layoutKey = 0;
-		answerLog = [];
-	}
-
-	// Отправка результатов в БД через единый API
-	async function sendAttemptToServer() {
-		if (answerLog.length === 0) return; // нечего сохранять
-
-		const congruentRts = answerLog.filter((a) => a.congruent).map((a) => a.reactionTimeMs);
-		const incongruentRts = answerLog.filter((a) => !a.congruent).map((a) => a.reactionTimeMs);
-		const avg = (arr) => (arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0);
-		const avgRtCongruentMs = Math.round(avg(congruentRts));
-		const avgRtIncongruentMs = Math.round(avg(incongruentRts));
-		const errors = answerLog.filter((a) => !a.isCorrect).length;
-
-		const meta = {
-			trialsAttempted: answerLog.length,
-			trialsPlanned: TOTAL_TRIALS,
-			timeoutTriggered: timeLimit,
-			avgRtCongruentMs,
-			avgRtIncongruentMs,
-			flankerEffectMs: avgRtIncongruentMs - avgRtCongruentMs,
-			errors
-		};
-
-		await submitAttempt({
-			testSlug: 'flanker',
-			startedAt: new Date(testStartedAt).toISOString(),
-			durationMs: Date.now() - testStartedAt,
-			score: correctAnswers,
-			maxScore: TOTAL_TRIALS,
-			normalizedScore: Math.round((correctAnswers / TOTAL_TRIALS) * 100),
-			meta,
-			answers: answerLog.map((entry, index) => ({
-				questionId: `trial-${index + 1}`,
-				answer: entry.selected,
-				isCorrect: entry.isCorrect,
-				reactionTimeMs: entry.reactionTimeMs,
-				meta: {
-					target: entry.target,
-					flankers: entry.trial,
-					congruent: entry.congruent
-				}
-			}))
-		});
 	}
 
 	function verdict(correct, total) {
@@ -207,7 +135,8 @@
 		{/if}
 	</div>
 	<p class="verdict {verdict(correctAnswers, TOTAL_TRIALS).cls}">
-		<strong>Вывод:</strong> {verdict(correctAnswers, TOTAL_TRIALS).text}
+		<strong>Вывод:</strong>
+		{verdict(correctAnswers, TOTAL_TRIALS).text}
 	</p>
 	<div class="controls">
 		<button type="button" on:click={restartTest}>Пройти заново</button>
@@ -369,7 +298,7 @@
 	}
 
 	.selected {
-		background: #4caf50 !important;
+		background: #fff !important;
 		color: black !important;
 	}
 </style>

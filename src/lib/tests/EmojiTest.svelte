@@ -1,9 +1,6 @@
 <script lang="ts">
-<<<<<<< InarBranch
 	import { submitAttempt } from '$lib/tests/recordAttempt';
 
-=======
->>>>>>> main
 	const EMOJIS = [
 		'😀',
 		'😃',
@@ -39,11 +36,7 @@
 		'😳',
 	];
 
-<<<<<<< InarBranch
 	const TEST_DURATION = 60;
-=======
-	const TEST_DURATION = 1;
->>>>>>> main
 
 	let currentEmoji = $state('😀');
 	let previousEmoji = $state('😀');
@@ -61,7 +54,6 @@
 
 	let timerInterval: number;
 
-<<<<<<< InarBranch
 	// Трекинг для статистики
 	let testStartedAt = 0;     // момент нажатия "Начать тест"
 	let emojiShownAt = 0;      // момент показа текущего стимула
@@ -76,8 +68,6 @@
 	};
 	let trialLog: TrialLog[] = [];
 
-=======
->>>>>>> main
 	function randomEmoji(exclude?: string) {
 		let filtered = exclude
 			? EMOJIS.filter((e) => e !== exclude)
@@ -99,17 +89,13 @@
 		} else {
 			currentEmoji = previousEmoji;
 		}
-<<<<<<< InarBranch
 
 		emojiShownAt = Date.now();
-=======
->>>>>>> main
 	}
 
 	function answer(userThinksChanged: boolean) {
 		if (!started || finished) return;
 
-<<<<<<< InarBranch
 		const now = Date.now();
 		const reactionTimeMs = emojiShownAt > 0 ? now - emojiShownAt : 0;
 		const isCorrect = userThinksChanged === actualChanged;
@@ -117,17 +103,11 @@
 		totalAnswers++;
 
 		if (isCorrect) {
-=======
-		totalAnswers++;
-
-		if (userThinksChanged === actualChanged) {
->>>>>>> main
 			score++;
 		} else {
 			mistakes++;
 		}
 
-<<<<<<< InarBranch
 		trialLog.push({
 			index: totalAnswers,
 			previousEmoji,
@@ -138,8 +118,6 @@
 			reactionTimeMs
 		});
 
-=======
->>>>>>> main
 		generateNextEmoji();
 	}
 
@@ -158,12 +136,9 @@
 		currentEmoji = randomEmoji();
 		previousEmoji = currentEmoji;
 
-<<<<<<< InarBranch
 		testStartedAt = Date.now();
 		trialLog = [];
 
-=======
->>>>>>> main
 		generateNextEmoji();
 
 		timerInterval = window.setInterval(() => {
@@ -180,7 +155,6 @@
 		started = false;
 
 		cleanup();
-<<<<<<< InarBranch
 		void sendAttemptToServer();
 	}
 
@@ -229,8 +203,6 @@
 				}
 			}))
 		});
-=======
->>>>>>> main
 	}
 
 	function cleanup() {
