@@ -215,13 +215,6 @@
 {/if}
 
 <style>
-	:global(body) {
-		margin: 0;
-		font-family: Arial, sans-serif;
-		background: #0c1452;
-		color: #fff;
-	}
-
 	h1,
 	p,
 	label {
