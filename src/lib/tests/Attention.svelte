@@ -1,6 +1,6 @@
 <script>
 	import { SvelteSet } from "svelte/reactivity";
-
+    import { submitAttempt } from '$lib/tests/recordAttempt';
 	// Svelte 5 runes
 	let n = $state(30); // сколько чисел всего
 	let m = $state(5);  // сколько нужно найти
@@ -65,12 +65,36 @@
 				stopTimer();
 				alert(`Готово! Время: ${elapsed} сек`);
 				started = false;
+				void sendAttemptToServer();
 			}
 		}
 		else {
 			errors+=1;
 		}
 	}
+
+	// Отправка результатов в БД через единый API
+	const sendAttemptToServer = async () => {
+		const correct = found.size;
+
+		const meta = {
+			n: targets.size,
+			m: found.size,
+			errors: errors
+		};
+
+		await submitAttempt({
+			testSlug: 'attention',
+			startedAt: new Date(startTime).toISOString(),
+			durationMs: Date.now() - startTime,
+			score: correct,
+			maxScore: targets.size,
+			normalizedScore: Math.round((correct / targets.size) * 100),
+			meta,
+			answers: []
+		});
+	};
+
 </script>
 
 <div class="controls">
