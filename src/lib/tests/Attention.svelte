@@ -1,6 +1,6 @@
 <script>
 	import { SvelteSet } from "svelte/reactivity";
-
+    import { submitAttempt } from '$lib/tests/recordAttempt';
 	// Svelte 5 runes
 	let n = $state(30); // сколько чисел всего
 	let m = $state(5);  // сколько нужно найти
@@ -65,12 +65,36 @@
 				stopTimer();
 				alert(`Готово! Время: ${elapsed} сек`);
 				started = false;
+				void sendAttemptToServer();
 			}
 		}
 		else {
 			errors+=1;
 		}
 	}
+
+	// Отправка результатов в БД через единый API
+	const sendAttemptToServer = async () => {
+		const correct = found.size;
+
+		const meta = {
+			n: targets.size,
+			m: found.size,
+			errors: errors
+		};
+
+		await submitAttempt({
+			testSlug: 'attention',
+			startedAt: new Date(startTime).toISOString(),
+			durationMs: Date.now() - startTime,
+			score: correct,
+			maxScore: targets.size,
+			normalizedScore: Math.round((correct / targets.size) * 100),
+			meta,
+			answers: []
+		});
+	};
+
 </script>
 
 <div class="controls">
@@ -84,7 +108,7 @@
 		<input type="number" bind:value={m} min="1" />
 	</label>
 
-	<button onclick={generateTest}>
+	<button class="start" onclick={generateTest}>
 		Старт
 	</button>
 </div>
@@ -101,7 +125,7 @@
 
 <div class="grid">
 	{#each numbers as num (num)}
-		<button
+		<button class="number-button"
 			class:selected={found.has(num)}
 			onclick={() => handleClick(num)}
 		>
@@ -171,6 +195,7 @@
 
 	.controls {
 		display: flex;
+		/* align-items: center; */
 		gap: 10px;
 		margin-bottom: 20px;
 		flex-wrap: wrap;
@@ -182,6 +207,7 @@
 
 	label {
 		display: flex;
+		/* align-items: center; */
 		flex-direction: column;
 		gap: 5px;
 	}
@@ -193,7 +219,19 @@
 		outline: none;
 	}
 
-	button {
+	.start {
+		padding: 20px 24px;
+		background: white;
+		color: #0c1452;
+		border: none;
+		border-radius: 14px;
+		font-size: 1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: transform 0.2s, opacity 0.2s;
+	}
+
+	.number-button {
 		padding: 10px 14px;
 		border: none;
 		border-radius: 14px;
@@ -202,7 +240,7 @@
 		transition: 0.2s;
 	}
 
-	button:hover {
+	.number-button:hover {
 		transform: scale(1.03);
 	}
 
