@@ -37,6 +37,7 @@
 	];
 
 	const TEST_DURATION = 60;
+
 	
 	let currentEmoji = $state('😀');
 	let previousEmoji = $state('😀');

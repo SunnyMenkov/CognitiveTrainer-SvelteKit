@@ -187,7 +187,7 @@
 	{#key layoutKey}
 		<div class="grid">
 			{#each currentTrial as dir, index}
-				<button type="button" disabled class:selected={index === 2}>{arrowSymbol(dir)}</button>
+				<button type="button" disabled>{arrowSymbol(dir)}</button>
 			{/each}
 		</div>
 	{/key}
@@ -361,8 +361,4 @@
 		justify-content: center;
 	}
 
-	.selected {
-		background: #4caf50 !important;
-		color: black !important;
-	}
 </style>
