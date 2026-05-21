@@ -26,9 +26,12 @@ docker compose up -d
 ```
 
 
-### 4. Накатите миграции БД
+### 4. Генерация/миграция таблиц БД
 
-`drizzle-kit migrate`
+`npx drizzle-kit generate`
+
+Если нужна миграция:
+`npx drizzle-kit migrate`
 
 Проверить таблицы:
 

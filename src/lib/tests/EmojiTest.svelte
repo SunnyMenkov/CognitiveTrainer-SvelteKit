@@ -38,8 +38,10 @@
 
 	const TEST_DURATION = 60;
 
+	
 	let currentEmoji = $state('😀');
 	let previousEmoji = $state('😀');
+
 
 	let started = $state(false);
 	let finished = $state(false);
@@ -364,10 +366,18 @@
 		transform: translateY(-2px);
 	}
 
-	.start,
-	.restart {
-		background: #22c55e;
-		color: white;
+
+	.start, .restart {
+		padding: 12px 24px;
+		background: white;
+		color: #0c1452;
+		border: none;
+		border-radius: 14px;
+		font-size: 1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: transform 0.2s, opacity 0.2s;
+	
 	}
 
 	.buttons button:first-child {
