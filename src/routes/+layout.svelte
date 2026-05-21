@@ -17,6 +17,7 @@
 		<div class="nav-center">
 			<a class="nav-button" href="/">Главная</a>
 			<a class="nav-button" href="/about">О тестах</a>
+			<a class="nav-button" href="/admin">Админ-панель</a>
 		</div>
 
 		<div class="nav-auth">
