@@ -9,18 +9,23 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
+
 <!-- Навбар сверху -->
 <nav class="navbar">
-	<div class="nav-grid">
-		<div class="nav-side"></div>
-
-		<div class="nav-center">
+	<div class="nav-container">
+		<!-- Левая группа кнопок -->
+		<div class="nav-left">
 			<a class="nav-button" href="/">Главная</a>
 			<a class="nav-button" href="/about">О тестах</a>
-			<a class="nav-button" href="/admin">Админ-панель</a>
+			{#if data.user?.isAdmin}
+				<a class="nav-button" href="/admin">Админ-панель</a>
+			{:else}
+				<a class="nav-button" href="/admin">Статистика</a>
+			{/if}
 		</div>
 
-		<div class="nav-auth">
+		<!-- Правая группа: логин / информация о пользователе -->
+		<div class="nav-right">
 			{#if data.user}
 				<span class="user-name">Привет, {data.user.name}!</span>
 				<form method="post" action="/logout">
@@ -33,23 +38,23 @@
 	</div>
 </nav>
 
+
 {@render children()}
 
 <style>
 	/* Сброс базовых отступов и установка box-sizing */
-	:global(*) {
+	/* :global(*) {
 		margin: 0;
 		padding: 0;
 		box-sizing: border-box;
-	}
+	} */
 
 	:global(body) {
+        margin: 0;
 		font-family: Arial, sans-serif;
 		background-color: #253c5f;
 	}
-
-	/* Стили для навбара */
-	.navbar {
+.navbar {
 		background-color: #22334d;
 		padding: 15px 0;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -59,35 +64,38 @@
 		z-index: 1000;
 	}
 
-	.nav-grid {
+	.nav-container {
 		max-width: 1200px;
 		margin: 0 auto;
 		padding: 0 20px;
-		display: grid;
-		grid-template-columns: 1fr auto 1fr;
-		align-items: center;
-		gap: 20px;
-	}
-
-	.nav-center {
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		justify-content: space-between; /* Раздвигает левую и правую группы */
 		gap: 20px;
+		flex-wrap: wrap; /* Позволяет переносить кнопки на узких экранах */
 	}
 
-	.nav-auth {
+	/* Левая группа кнопок */
+	.nav-left {
 		display: flex;
 		align-items: center;
-		justify-content: flex-end;
 		gap: 10px;
+		flex-wrap: wrap; /* Кнопки переносятся, если не влазят */
+	}
+
+	/* Правая группа с логином / профилем */
+	.nav-right {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		flex-shrink: 0; /* Не сжимается, чтобы логин всегда был виден справа */
 	}
 
 	.nav-button {
 		background-color: white;
 		color: black;
 		border: none;
-		padding: 10px 20px;
+		padding: 8px 16px;
 		font-size: 16px;
 		cursor: pointer;
 		border-radius: 5px;
@@ -97,6 +105,8 @@
 		display: inline-block;
 		text-decoration: none;
 		font-family: inherit;
+		white-space: nowrap;
+		text-align: center;
 	}
 
 	.nav-button:hover {
@@ -110,6 +120,7 @@
 	.nav-button.login {
 		background-color: #4caf50;
 		color: white;
+        /* margin-top: 4%; */
 	}
 
 	.nav-button.login:hover {
@@ -120,6 +131,8 @@
 		background-color: transparent;
 		color: white;
 		border: 1px solid rgba(255, 255, 255, 0.4);
+        margin-top: 4%;
+
 	}
 
 	.nav-button.logout:hover {
