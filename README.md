@@ -51,9 +51,51 @@ npm run dev
 ```
 # Веб-интерфейс для БД (открывает https://local.drizzle.studio)
 npx drizzle-kit studio
-
-
 ```
+
+---
+
+## Деплой на Vercel + Neon
+
+### 1. Настройка Neon БД
+
+1. Зарегистрируйтесь на [neon.tech](https://neon.tech)
+2. Создайте новый проект
+3. Скопируйте Connection String в формате `postgresql://user:password@host/database`
+
+### 2. Настройка Vercel
+
+1. Залейте репозиторий на GitHub
+2. Зайдите на [vercel.com](https://vercel.com)
+3. Импортируйте ваш репозиторий
+4. На этапе конфигурации добавьте переменные окружения:
+
+| Переменная | Значение |
+|---|---|
+| `DATABASE_URL` | Connection String от Neon |
+| `BETTER_AUTH_SECRET` | 32-символный ключ с высокой энтропией (используйте `openssl rand -hex 16`) |
+| `ORIGIN` | Ваш URL на Vercel (например, `https://psytrainer.vercel.app`) |
+
+5. Нажмите "Deploy"
+
+### 3. Что происходит при деплое
+
+`vercel.json` автоматически запустит:
+```bash
+npm run db:push  # Применяет миграции к Neon БД
+npm run build    # Собирает приложение
+```
+
+**Важно:** Таблицы создадутся автоматически при первом деплое благодаря `drizzle-kit push`.
+
+### 4. Проверка
+
+После успешного деплоя:
+1. Откройте ваше приложение
+2. Попробуйте зарегистрироваться на `/demo/better-auth/login`
+3. Данные должны сохраняться в Neon БД
+
+---
 
 
 ## Структура проекта
