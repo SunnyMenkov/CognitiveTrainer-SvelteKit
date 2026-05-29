@@ -149,16 +149,39 @@
 			<tbody>
 				{#each attempts as attempt (attempt.id)}
 					<tr>
-						<td class="mono">{attempt.id.slice(0, 8)}</td>
-						<td>{attempt.userId.slice(0, 8)}</td>
-						<td>{attempt.testSlug}</td>
-						<td>{formatDate(attempt.startedAt)}</td>
-						<td>{attempt.score}/{attempt.maxScore}</td>
-						<td>{attempt.normalizedScore}</td>
-						<td>{attempt.durationMs}</td>
-						<td>
-							<button onclick={() => deleteAttempt(attempt.id)} class="btn-delete">🗑️</button>
-						</td>
+						<td data-label="ID" class="mono">
+	{attempt.id.slice(0, 8)}
+</td>
+
+<td data-label="Пользователь">
+	{attempt.userId.slice(0, 8)}
+</td>
+
+<td data-label="Тест">
+	{attempt.testSlug}
+</td>
+
+<td data-label="Дата">
+	{formatDate(attempt.startedAt)}
+</td>
+
+<td data-label="Балл">
+	{attempt.score}/{attempt.maxScore}
+</td>
+
+<td data-label="Нормализованный">
+	{attempt.normalizedScore}
+</td>
+
+<td data-label="Время (мс)">
+	{attempt.durationMs}
+</td>
+
+<td data-label="Действие">
+	<button onclick={() => deleteAttempt(attempt.id)} class="btn-delete">
+		🗑️
+	</button>
+</td>
 					</tr>
 				{/each}
 			</tbody>
@@ -286,6 +309,43 @@
 	tr:hover {
 		background-color: rgb(184, 184, 184);
 	}
+
+@media (max-width: 768px) {
+	table,
+	thead,
+	tbody,
+	tr,
+	td {
+		display: block;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	thead {
+		display: none;
+	}
+
+	tr {
+		margin-bottom: 1rem;
+		padding: 1rem;
+		border-radius: 12px;
+		background: #111827;
+	}
+
+	td {
+		display: flex;
+		justify-content: space-between;
+		padding: 0.5rem 0;
+		border: none;
+	}
+
+	td::before {
+		content: attr(data-label);
+		font-weight: 600;
+		opacity: 0.7;
+	}
+}
+
 
 	.mono {
 		font-family: monospace;
