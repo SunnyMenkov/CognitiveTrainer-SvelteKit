@@ -1,16 +1,5 @@
 {
   "buildCommand": "npm run db:push && npm run build",
   "devCommand": "npm run dev",
-  "installCommand": "npm ci",
-  "env": {
-    "DATABASE_URL": {
-      "description": "PostgreSQL connection string from Neon"
-    },
-    "BETTER_AUTH_SECRET": {
-      "description": "Secret key for better-auth (32+ chars, high entropy)"
-    },
-    "ORIGIN": {
-      "description": "Your Vercel deployment URL (e.g., https://psytrainer.vercel.app)"
-    }
-  }
+  "installCommand": "npm ci"
 }
