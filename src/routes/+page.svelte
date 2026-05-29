@@ -41,8 +41,6 @@
 }
 
 .grid-container {
-  
-
     display: grid;
     gap: 1em;
     justify-content: center;

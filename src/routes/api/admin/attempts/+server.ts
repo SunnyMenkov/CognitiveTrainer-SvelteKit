@@ -1,19 +1,24 @@
 import { json } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { testAttempt } from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 export async function GET({ url }) {
 	try {
 		const slug = url.searchParams.get('slug');
+		const userId = url.searchParams.get('userId');
 
 		let query = db.select().from(testAttempt).orderBy((t) => t.startedAt);
 
-		if (slug) {
-			query = query.where(eq(testAttempt.testSlug, slug));
+		const conditions = [];
+		if (slug) conditions.push(eq(testAttempt.testSlug, slug));
+		if (userId) conditions.push(eq(testAttempt.userId, userId));
+
+		if (conditions.length > 0) {
+		 query = query.where(and(...conditions));
 		}
 
-		const attempts = await query;
+		const attempts = await query.orderBy((t) => t.startedAt);
 		return json(attempts);
 	} catch (error) {
 		console.error('Error fetching attempts:', error);
@@ -24,9 +29,7 @@ export async function GET({ url }) {
 export async function DELETE({ params }) {
 	try {
 		const { id } = params;
-
 		await db.delete(testAttempt).where(eq(testAttempt.id, id));
-
 		return json({ success: true });
 	} catch (error) {
 		console.error('Error deleting attempt:', error);

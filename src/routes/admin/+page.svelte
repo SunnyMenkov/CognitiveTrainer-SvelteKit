@@ -1,14 +1,21 @@
 <script>
 	import { onMount } from 'svelte';
 
+    let { data } = $props();
+
 	let testSlugs = $state([]);
 	let selectedSlug = $state('');
+
+	let users = $state([]);
+	let selectedUserId = $state('');	
+
 	let attempts = $state([]);
 	let loading = $state(false);
 	let error = $state('');
 
 	onMount(async () => {
 		await loadTestSlugs();
+		await loadUsers();
 	});
 
 	async function loadTestSlugs() {
@@ -21,19 +28,34 @@
 		}
 	}
 
-	async function loadAttempts() {
-		loading = true;
+	async function loadUsers() {
 		try {
-			const url = selectedSlug ? `/api/admin/attempts?slug=${selectedSlug}` : '/api/admin/attempts';
-			const res = await fetch(url);
-			attempts = await res.json();
-			error = '';
+			const res = await fetch('/api/admin/users');
+			users = await res.json();
+			selectedUserId = '';
 		} catch (e) {
-			error = `Ошибка загрузки попыток: ${e.message}`;
-		} finally {
-			loading = false;
+			error = `Ошибка загрузки пользователей: ${e.message}`;
 		}
 	}
+
+    async function loadAttempts() {
+        loading = true;
+        try {
+            const params = new URLSearchParams();
+            if (selectedSlug) params.append('slug', selectedSlug);
+            if (selectedUserId) params.append('userId', selectedUserId);
+            
+            const url = `/api/admin/attempts?${params.toString()}`;
+            const res = await fetch(url);
+            attempts = await res.json();
+            error = '';
+        } catch (e) {
+            error = `Ошибка загрузки попыток: ${e.message}`;
+        } finally {
+            loading = false;
+        }
+    }
+
 
 	async function deleteAttempt(id) {
 		if (!confirm('Удалить эту попытку?')) return;
@@ -53,13 +75,20 @@
 		}).format(new Date(date));
 	}
 
+	   // Для не-админа гарантируем, что selectedUserId всегда равна его ID
+    $effect(() => {
+        if (!data.isAdmin && selectedUserId !== data.currentUserId) {
+            selectedUserId = data.currentUserId;
+        }
+    });
+
 	$effect(() => {
 		loadAttempts();
 	});
 </script>
 
 <div class="admin-panel">
-	<h1>Админ-панель</h1>
+	<h1>{data.isAdmin ? 'Админ-панель' : 'Моя статистика'}</h1>
 
 	{#if error}
 		<div class="alert alert-error">{error}</div>
@@ -75,6 +104,17 @@
 				{/each}
 			</select>
 		</label>
+		{#if data.isAdmin}
+		<label>
+			Выберите пользователя:
+			<select bind:value={selectedUserId}>
+				<option value="">Все пользователи</option>
+				{#each users as user (user.id)}
+					<option value={user.id}>{user.name}</option>
+				{/each}
+			</select>
+		</label>
+		{/if}
 	</div>
 
 	{#if loading}
