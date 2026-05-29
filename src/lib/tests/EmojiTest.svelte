@@ -48,6 +48,14 @@
 
 	let timeLeft = $state(TEST_DURATION);
 
+	let nBack = $state(1);
+
+	let emojiHistory = $state<string[]>([]);
+
+	const isWarmup = $derived(
+	emojiHistory.length <= nBack
+);
+
 	let score = $state(0);
 	let mistakes = $state(0);
 	let totalAnswers = $state(0);
@@ -80,20 +88,33 @@
 		];
 	}
 
-	function generateNextEmoji() {
-		previousEmoji = currentEmoji;
+function generateNextEmoji() {
+	const compareEmoji =
+		emojiHistory[emojiHistory.length - nBack];
 
-		// 50% шанс изменения
-		actualChanged = Math.random() > 0.5;
+	// Пока истории недостаточно —
+	// всегда генерируем случайный emoji
+	if (!compareEmoji) {
+		currentEmoji = randomEmoji();
+		actualChanged = true;
 
-		if (actualChanged) {
-			currentEmoji = randomEmoji(currentEmoji);
-		} else {
-			currentEmoji = previousEmoji;
-		}
-
-		emojiShownAt = Date.now();
+		emojiHistory.push(currentEmoji);
+		return;
 	}
+
+	// 50% шанс совпадения с N-back
+	const shouldMatch = Math.random() > 0.5;
+
+	if (shouldMatch) {
+		currentEmoji = compareEmoji;
+		actualChanged = false;
+	} else {
+		currentEmoji = randomEmoji(compareEmoji);
+		actualChanged = true;
+	}
+
+	emojiHistory.push(currentEmoji);
+}
 
 	function answer(userThinksChanged: boolean) {
 		if (!started || finished) return;
@@ -102,12 +123,14 @@
 		const reactionTimeMs = emojiShownAt > 0 ? now - emojiShownAt : 0;
 		const isCorrect = userThinksChanged === actualChanged;
 
-		totalAnswers++;
+		if (!isWarmup) {
+			totalAnswers++;
 
-		if (isCorrect) {
-			score++;
-		} else {
-			mistakes++;
+			if (isCorrect) {
+				score++;
+			} else {
+				mistakes++;
+			}
 		}
 
 		trialLog.push({
@@ -136,7 +159,6 @@
 		timeLeft = TEST_DURATION;
 
 		currentEmoji = randomEmoji();
-		previousEmoji = currentEmoji;
 
 		testStartedAt = Date.now();
 		trialLog = [];
@@ -208,6 +230,7 @@
 	}
 
 	function cleanup() {
+		emojiHistory = [];
 		clearInterval(timerInterval);
 	}
 
@@ -252,12 +275,32 @@
 	</div>
 
 	{#if !started && !finished}
+	
+
+		<div class="start">
+			N-Back:
+		<select bind:value={nBack}>
+			<option value={1}>1-back</option>
+			<option value={2}>2-back</option>
+			<option value={3}>3-back</option>
+		</select>
+	</div>
+
 		<button class="start" onclick={startTest}>
 			Начать тест
 		</button>
 	{/if}
 
 	{#if started}
+		{#if isWarmup}
+			<h1>
+				Запомните последовательность из n эмодзи.
+			</h1>
+
+			<button onclick={() => answer(true)}>
+				Следующий
+			</button>
+		{:else}
 		<div class="buttons">
 			<button onclick={() => answer(true)}>
 				Изменился
@@ -267,6 +310,7 @@
 				Не изменился
 			</button>
 		</div>
+		{/if}
 	{/if}
 
 	{#if finished}
@@ -300,7 +344,7 @@
 
 	h1 {
 		margin: 0;
-		font-size: 2rem;
+		font-size: 1rem;
 	}
 
 	.stats {
