@@ -108,6 +108,8 @@ export interface EmojiTestMeta {
 	durationSeconds: number;
 	/** Всего ответов пользователя за время теста */
 	totalTrials: number;
+	/** Сложность n-back */
+	nBack: number;
 	/** True positive: эмодзи реально сменилось, пользователь сказал "изменился" */
 	hits: number;
 	/** Miss: эмодзи сменилось, пользователь сказал "не изменился" */

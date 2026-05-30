@@ -75,6 +75,7 @@
 		userSaidChanged: boolean;
 		isCorrect: boolean;
 		reactionTimeMs: number;
+		nBack: number;
 	};
 	let trialLog: TrialLog[] = [];
 
@@ -140,7 +141,8 @@ function generateNextEmoji() {
 			actualChanged,
 			userSaidChanged: userThinksChanged,
 			isCorrect,
-			reactionTimeMs
+			reactionTimeMs,
+			nBack
 		});
 
 		generateNextEmoji();
@@ -191,6 +193,7 @@ function generateNextEmoji() {
 		const misses = trialLog.filter((t) => t.actualChanged && !t.userSaidChanged).length;
 		const falseAlarms = trialLog.filter((t) => !t.actualChanged && t.userSaidChanged).length;
 		const correctRejections = trialLog.filter((t) => !t.actualChanged && !t.userSaidChanged).length;
+		const nBack = trialLog.length > 0 ? trialLog[0].nBack : 1;
 
 		const correctRts = trialLog.filter((t) => t.isCorrect).map((t) => t.reactionTimeMs);
 		const avgReactionMs = correctRts.length
@@ -204,7 +207,8 @@ function generateNextEmoji() {
 			misses,
 			falseAlarms,
 			correctRejections,
-			avgReactionMs
+			avgReactionMs,
+			nBack
 		};
 
 		await submitAttempt({
