@@ -16,18 +16,18 @@ export const testRegistry = {
         component: () => import("$lib/tests/Memory1.svelte")
     },
     memory2: {
-        title: "Запоминание чисел",
+        title: "Тест на запоминание чисел",
         description: "Запомните последовательность чисел и воспроизведите её в том же порядке",
         component: () => import("$lib/tests/NumberMemory.svelte")
     },
     flanker: {
         title: "Фланговый тест Эриксена",
-        description: "Измерение концентрации и скорости обработки данных",
+        description: "Определите, в какую сторону смотрит стрелка посередине как можно быстрее",
         component: () => import("$lib/tests/FlankerTest.svelte")
     },
     letter: {
         title: "Буквенный охват",
-        description: "На короткое время показывается набор букв — запомните их порядок.",
+        description: "На короткое время показывается набор букв — запомните их порядок",
         component: () => import("$lib/tests/LetterCoverageTest.svelte")
     }
 }
