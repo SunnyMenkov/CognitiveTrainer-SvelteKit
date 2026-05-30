@@ -23,10 +23,9 @@
 	const studySeconds = 10;
 	const levelConfigs: LevelConfig[] = Array.from({ length: 8 }, (_, index) => ({
 		level: index + 1,
-		count: index + 3,
-		mode: index < 4 ? 'single' : 'mixed'
+		mode: index < 4 ? 'single' : 'mixed',
+		count: index >= 4 ? index-1 : index + 3
 	}));
-
 	let phase = $state<Phase>('intro');
 	let currentLevelIndex = $state(0);
 	let currentSequence = $state<number[]>([]);
