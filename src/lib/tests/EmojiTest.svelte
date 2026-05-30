@@ -268,6 +268,18 @@ function generateNextEmoji() {
 		</div>
 	</div>
 
+	
+	{#if !started && !finished}
+	<div class="instruction-card">
+				<h2>Инструкция</h2>
+				<ul>
+					<li>Вам будет показано несколько похожих друг на друга эмодзи</li>
+					<li>Нужно определить, изменился ли эмодзи по сравнению с тем, что был n позиций назад</li>	
+					<li>Старайтесь держать в памяти последние n эмодзи</li>
+					<li>Вы можете выбрать количество шагов для запоминания (сейчас n-back = {nBack})</li>
+				</ul>
+			</div>
+	{/if}
 	<div class="emoji-card">
 		<div class="emoji">
 			{currentEmoji}
@@ -275,9 +287,7 @@ function generateNextEmoji() {
 	</div>
 
 	{#if !started && !finished}
-	
-
-		<div class="start">
+	<div class="start">
 			N-Back:
 		<select bind:value={nBack}>
 			<option value={1}>1-back</option>
@@ -285,7 +295,6 @@ function generateNextEmoji() {
 			<option value={3}>3-back</option>
 		</select>
 	</div>
-
 		<button class="start" onclick={startTest}>
 			Начать тест
 		</button>
@@ -294,7 +303,7 @@ function generateNextEmoji() {
 	{#if started}
 		{#if isWarmup}
 			<h1>
-				Запомните последовательность из n эмодзи.
+				Запомните последовательность из n эмодзи
 			</h1>
 
 			<button onclick={() => answer(true)}>
@@ -361,6 +370,7 @@ function generateNextEmoji() {
 		padding: 16px;
 		border-radius: 16px;
 		text-align: center;
+		min-width: 0;
 	}
 
 	.stats span {
@@ -372,6 +382,16 @@ function generateNextEmoji() {
 	.stats strong {
 		font-size: 1.5rem;
 	}
+
+	@media (max-width: 450px) {
+    .stats span {
+        font-size: 10px;
+    }
+    
+    .stats strong {
+        font-size: 1rem;
+    }
+}
 
 	.emoji-card {
 		width: 260px;
@@ -390,6 +410,35 @@ function generateNextEmoji() {
 		font-size: 7rem;
 		user-select: none;
 	}
+	
+	/* Intro */
+	.instruction-card {
+		background: rgba(255, 255, 255, 0.06);
+		border-radius: 16px;
+		padding: 20px 24px;
+	}
+
+	.instruction-card h2 {
+		font-size: 1rem;
+		font-weight: 600;
+		color: white;
+		margin: 0 0 12px;
+	}
+
+	.instruction-card ul {
+		margin: 0;
+		padding-left: 30px;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	.instruction-card li {
+		color: rgba(255, 255, 255, 0.65);
+		font-size: 0.95rem;
+		line-height: 1.5;
+	}
+
 
 	.buttons {
 		display: flex;
