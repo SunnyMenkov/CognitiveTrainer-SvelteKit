@@ -149,7 +149,7 @@
 			<tbody>
 				{#each attempts as attempt (attempt.id)}
 					<tr>
-						<td data-label="ID" class="mono">
+<td data-label="ID" class="mono">
 	{attempt.id.slice(0, 8)}
 </td>
 

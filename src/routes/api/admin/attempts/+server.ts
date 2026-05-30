@@ -1,24 +1,24 @@
 import { json } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { testAttempt } from '$lib/server/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 
 export async function GET({ url }) {
 	try {
 		const slug = url.searchParams.get('slug');
 		const userId = url.searchParams.get('userId');
 
-		let query = db.select().from(testAttempt).orderBy((t) => t.startedAt);
+		let query = db.select().from(testAttempt).orderBy(desc(testAttempt.startedAt));
 
 		const conditions = [];
 		if (slug) conditions.push(eq(testAttempt.testSlug, slug));
 		if (userId) conditions.push(eq(testAttempt.userId, userId));
 
 		if (conditions.length > 0) {
-		 query = query.where(and(...conditions));
+			query = query.where(and(...conditions));
 		}
 
-		const attempts = await query.orderBy((t) => t.startedAt);
+		const attempts = await query;
 		return json(attempts);
 	} catch (error) {
 		console.error('Error fetching attempts:', error);
